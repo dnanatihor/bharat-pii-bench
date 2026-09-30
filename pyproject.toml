@@ -8,6 +8,9 @@ license = "Apache-2.0"
 license-files = ["LICENSE"]
 dependencies = ["pyyaml>=6.0.2"]
 
+[project.scripts]
+bpb = "bharat_pii.cli:main"
+
 [project.optional-dependencies]
 bench = [
     "faker>=33",
@@ -62,6 +65,10 @@ python_version = "3.11"
 strict = true
 packages = ["bharat_pii"]
 mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = "bharat_pii.parquet_store"
+ignore_errors = true
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
