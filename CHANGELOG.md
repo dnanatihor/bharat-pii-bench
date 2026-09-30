@@ -12,3 +12,4 @@ and this project uses [Semantic Versioning](https://semver.org/).
 - Phase 0 scaffold: label taxonomy, config models, GST/UPI/vehicle reference lists, and extras `bench`, `presidio`, `ner`, and `llm`.
 - Phase 1 generators and validators for the identifier taxonomy, including hard negatives.
 - Phase 2 dataset builder for seed-stable T1 and T2 Parquet, plus the dataset card.
+- Phase 3 regex-and-checksum detector, metrics, and run reports.
