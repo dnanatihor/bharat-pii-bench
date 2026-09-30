@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           enable-cache: true
-      - run: uv sync --group dev --frozen
+      - run: uv sync --group dev --extra bench --frozen
       - run: uv run ruff check .
       - run: uv run ruff format --check .
       - run: uv run mypy --strict src

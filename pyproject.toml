@@ -27,6 +27,7 @@ llm = [
 
 [dependency-groups]
 dev = [
+    "hypothesis>=6.100",
     "mypy>=1.13",
     "pytest>=8.3",
     "ruff==0.16.9",
@@ -48,6 +49,7 @@ packages = ["src/bharat_pii"]
 target-version = "py311"
 line-length = 100
 src = ["src", "tests"]
+extend-exclude = ["SPEC.md", "CURSOR_PROMPTS.md"]
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP", "B", "SIM"]
