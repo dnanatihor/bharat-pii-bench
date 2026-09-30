@@ -1,0 +1,57 @@
+seed: 42
+per_label_count: 500
+none_count: 2000
+hard_negative_fraction: 0.5
+splits:
+  dev: 0.2
+  test: 0.8
+noise:
+  null_or_blank: 0.05
+  malformed: 0.05
+column_sample_size: 20
+name_conditions:
+  truthful:
+    IN_AADHAAR: [aadhaar_no]
+    IN_PAN: [pan_number]
+    IN_GSTIN: [gstin]
+    IN_UPI_ID: [upi_id]
+    IN_MOBILE: [customer_mobile]
+    IN_PINCODE: [pincode]
+    IN_PASSPORT: [passport_no]
+    IN_VOTER_ID: [voter_id]
+    IN_IFSC: [ifsc_code]
+    IN_VEHICLE_REG: [vehicle_no]
+    IN_BANK_ACCOUNT: [account_number]
+    PERSON_NAME: [customer_name]
+    POSTAL_ADDRESS: [postal_address]
+    EMAIL: [email]
+    DATE_OF_BIRTH: [date_of_birth]
+  obfuscated: [col_07, field_c]
+  misleading:
+    IN_AADHAAR: [order_id]
+    IN_PAN: [customer_ref]
+    IN_GSTIN: [invoice_no]
+    IN_UPI_ID: [payment_ref]
+    IN_MOBILE: [callback_no]
+    IN_PINCODE: [route_code]
+    IN_PASSPORT: [travel_ref]
+    IN_VOTER_ID: [booth_code]
+    IN_IFSC: [branch_ref]
+    IN_VEHICLE_REG: [asset_tag]
+    IN_BANK_ACCOUNT: [ledger_id]
+    PERSON_NAME: [display_text]
+    POSTAL_ADDRESS: [shipping_note]
+    EMAIL: [login_hint]
+    DATE_OF_BIRTH: [event_date]
+detectors:
+  regex_checksum:
+    enabled: true
+  presidio:
+    enabled: false
+  ner:
+    enabled: false
+    model_id: ""
+  llm:
+    enabled: false
+    model_ids: []
+budget_usd: 5

@@ -1,0 +1,45 @@
+# code,name,status
+# current: issued for new registrations
+# former: no longer issued, still valid on existing plates
+# series: BH is the Bharat series marker, not a state code
+AN,Andaman and Nicobar Islands,current
+AP,Andhra Pradesh,current
+AR,Arunachal Pradesh,current
+AS,Assam,current
+BR,Bihar,current
+CG,Chhattisgarh,current
+CH,Chandigarh,current
+DD,Dadra and Nagar Haveli and Daman and Diu,current
+DL,Delhi,current
+GA,Goa,current
+GJ,Gujarat,current
+HP,Himachal Pradesh,current
+HR,Haryana,current
+JH,Jharkhand,current
+JK,Jammu and Kashmir,current
+KA,Karnataka,current
+KL,Kerala,current
+LA,Ladakh,current
+LD,Lakshadweep,current
+MH,Maharashtra,current
+ML,Meghalaya,current
+MN,Manipur,current
+MP,Madhya Pradesh,current
+MZ,Mizoram,current
+NL,Nagaland,current
+OD,Odisha,current
+PB,Punjab,current
+PY,Puducherry,current
+RJ,Rajasthan,current
+SK,Sikkim,current
+TG,Telangana,current
+TN,Tamil Nadu,current
+TR,Tripura,current
+UK,Uttarakhand,current
+UP,Uttar Pradesh,current
+WB,West Bengal,current
+UA,Uttarakhand,former
+OR,Odisha,former
+DN,Dadra and Nagar Haveli,former
+TS,Telangana,former
+BH,Bharat series,series

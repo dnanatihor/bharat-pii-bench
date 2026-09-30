@@ -1,0 +1,67 @@
+[project]
+name = "bharat-pii"
+version = "0.1.0"
+description = "Synthetic Indian personal-data detection benchmark and checksum detector library"
+readme = "README.md"
+requires-python = ">=3.11"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+dependencies = ["pyyaml>=6.0.2"]
+
+[project.optional-dependencies]
+bench = [
+    "faker>=33",
+    "matplotlib>=3.9",
+    "pandas>=2.2",
+    "pyarrow>=18",
+]
+presidio = ["presidio-analyzer>=2.2"]
+ner = [
+    "torch>=2.5",
+    "transformers>=4.46",
+]
+llm = [
+    "langchain>=0.3",
+    "langchain-core>=0.3",
+]
+
+[dependency-groups]
+dev = [
+    "mypy>=1.13",
+    "pytest>=8.3",
+    "ruff==0.16.9",
+    "types-PyYAML>=6.0.12",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/bharat_pii"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"data" = "bharat_pii/data"
+"configs" = "bharat_pii/configs"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["bharat_pii"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+packages = ["bharat_pii"]
+mypy_path = "src"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = ["-m", "not heavy"]
+markers = ["heavy: downloads models; skipped by default"]

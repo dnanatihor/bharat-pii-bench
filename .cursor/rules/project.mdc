@@ -1,0 +1,21 @@
+---
+description: Engineering rules for bharat-pii-bench (generated from SPEC.md by the portfolio bootstrap)
+globs:
+alwaysApply: true
+---
+
+# Shared rules
+
+- SPEC.md is the source of truth. Implement only the phase you are asked to implement.
+- Python 3.11+, uv, full type hints, mypy --strict on src/, ruff format and ruff check.
+- Write tests first wherever SPEC.md gives expected outputs.
+- No network access in tests; LLMs and external APIs are stubbed.
+- Never log or commit secrets. Never commit real personal data.
+- Record significant decisions and spike outcomes as ADRs in docs/adr/ using the template there.
+- If SPEC.md is ambiguous, stop and list the ambiguity; do not invent behaviour.
+
+# Project rules (from SPEC.md, Appendix A)
+
+- Only synthetic data. Never add real identifiers to code, tests, or docs, except a publicly listed GSTIN used solely to verify the check-char algorithm.
+- Generated datasets stay under data/generated/ and are git-ignored.
+- The base library (bharat_pii.detect, bharat_pii.validate) must not import heavy optional dependencies.

@@ -1,0 +1,4 @@
+# Presidio entity type -> taxonomy label. Unmapped types become NONE in the adapter.
+# Coarse defaults (PHONE_NUMBER, DATE_TIME, LOCATION) stay unmapped until Phase 4.
+EMAIL_ADDRESS: EMAIL
+PERSON: PERSON_NAME
