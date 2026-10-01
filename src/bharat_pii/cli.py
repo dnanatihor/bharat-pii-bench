@@ -22,6 +22,7 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--split", choices=("dev", "test"), default="test")
     run.add_argument("--seed", type=int)
     run.add_argument("--out", type=Path, default=Path("results"))
+    run.add_argument("--budget-usd", type=float)
     report = subcommands.add_parser("report", help="print a saved report")
     report.add_argument("run_dir", type=Path)
     args = parser.parse_args(argv)
@@ -37,6 +38,7 @@ def main(argv: list[str] | None = None) -> int:
             tasks=tasks,
             split=str(args.split),
             out_root=Path(args.out),
+            budget_usd=args.budget_usd,
         )
         print(paths.directory)
         return 0

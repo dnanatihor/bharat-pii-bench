@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from bharat_pii.config import BenchConfig, load_bench_config
+from bharat_pii.cost import Budget
 from bharat_pii.dataset import ColumnExample, build_t1, build_t2, with_seed
 from bharat_pii.detect import Detector, detector_by_name
 from bharat_pii.labels import Label
@@ -34,6 +35,7 @@ def run_baseline(
     tasks: tuple[str, ...] = ("t1", "t2"),
     split: str = "test",
     out_root: Path = Path("results"),
+    budget_usd: float | None = None,
 ) -> RunPaths:
     """Score T1 and T2 and write metrics, a report, a confusion plot, and run.json."""
     run_id = uuid.uuid4().hex[:12]
@@ -49,9 +51,10 @@ def run_baseline(
         f"Split: `{split}`. Seed: `{config.seed}`.",
         "",
     ]
+    budget = Budget(config.budget_usd if budget_usd is None else budget_usd)
     loaded: list[Detector] = []
     for detector_name in detectors:
-        detector = detector_by_name(detector_name)
+        detector = detector_by_name(detector_name, budget=budget)
         loaded.append(detector)
         sections.append(f"## {detector.name} {detector.version}")
         sections.append("")
@@ -74,6 +77,10 @@ def run_baseline(
             sections.append(f"- hard-negative false-positive rate: {fpr:.4f}")
             sections.append(f"- latency p50 per 1,000 values: {per_thousand['p50']:.6f}s")
             sections.append(f"- latency p95 per 1,000 values: {per_thousand['p95']:.6f}s")
+            cost = _cost_usd(detector)
+            if cost is not None and values:
+                per_thousand_cost = cost / len(values) * 1000
+                sections.append(f"- cost per 1,000 values: ${per_thousand_cost:.6f}")
             sections.append("")
             for item in card.per_label:
                 rows.append(
@@ -93,6 +100,7 @@ def run_baseline(
     _write_csv(directory / "metrics.csv", rows)
     recognizers = [name for detector in loaded for name in _active_recognizers(detector)]
     model_ids = [model_id for detector in loaded if (model_id := _model_id(detector))]
+    prompt_versions = [version for detector in loaded if (version := _prompt_version(detector))]
     (directory / "run.json").write_text(
         json.dumps(
             {
@@ -102,8 +110,10 @@ def run_baseline(
                 "detectors": list(detectors),
                 "versions": {detector.name: detector.version for detector in loaded},
                 "model_ids": model_ids,
-                "prompt_version": None,
+                "prompt_version": prompt_versions[0] if prompt_versions else None,
                 "active_presidio_recognizers": recognizers,
+                "cost_usd": budget.spent_usd,
+                "budget_usd": budget.limit_usd,
             },
             indent=2,
         )
@@ -177,6 +187,18 @@ def _active_recognizers(detector: Detector) -> tuple[str, ...]:
     if not isinstance(raw, tuple):
         return ()
     return tuple(str(item) for item in raw)
+
+
+def _cost_usd(detector: Detector) -> float | None:
+    raw = getattr(detector, "cost_usd", None)
+    if isinstance(raw, int | float):
+        return float(raw)
+    return None
+
+
+def _prompt_version(detector: Detector) -> str:
+    raw = getattr(detector, "prompt_version", "")
+    return raw if isinstance(raw, str) else ""
 
 
 def _model_id(detector: Detector) -> str:

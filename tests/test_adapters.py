@@ -62,7 +62,8 @@ def test_ner_uses_the_highest_mapped_group() -> None:
 def test_report_lists_active_recognizers(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> None:
     detector = PresidioDetector(analyzer=_Analyzer())
 
-    def loader(name: str) -> PresidioDetector:
+    def loader(name: str, budget: object = None) -> PresidioDetector:
+        del budget
         assert name == "presidio"
         return detector
 

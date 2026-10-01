@@ -1,11 +1,12 @@
 """Column label from a majority of value labels. A tie is ``NONE``."""
 
 from collections import Counter
+from collections.abc import Sequence
 
 from bharat_pii.labels import Label
 
 
-def majority_label(labels: list[Label]) -> Label:
+def majority_label(labels: Sequence[Label]) -> Label:
     if not labels:
         return Label.NONE
     counts = Counter(labels)

@@ -4,6 +4,7 @@ import re
 from collections import Counter
 from typing import Protocol, cast
 
+from bharat_pii.cost import Budget
 from bharat_pii.labels import Label
 from bharat_pii.validate import VALIDATORS
 
@@ -163,7 +164,7 @@ def mask(text: str, token_style: str = "typed") -> str:
     return rendered
 
 
-def detector_by_name(name: str) -> Detector:
+def detector_by_name(name: str, *, budget: Budget | None = None) -> Detector:
     if name == "regex_checksum":
         return RegexChecksum()
     if name == "regex_checksum+names":
@@ -176,6 +177,15 @@ def detector_by_name(name: str) -> Detector:
         from bharat_pii.adapters.ner import NerDetector
 
         return cast(Detector, NerDetector())
+    if name == "llm":
+        from bharat_pii.adapters.llm import LlmDetector
+
+        return cast(Detector, LlmDetector(budget=budget))
+    if name == "hybrid":
+        from bharat_pii.adapters.hybrid import HybridDetector
+        from bharat_pii.adapters.llm import LlmDetector
+
+        return cast(Detector, HybridDetector(LlmDetector(budget=budget)))
     raise ValueError(f"unknown detector {name}")
 
 

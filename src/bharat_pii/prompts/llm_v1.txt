@@ -1,0 +1,9 @@
+prompt_version: llm_v1
+
+Classify every value as exactly one taxonomy label.
+Taxonomy: {taxonomy}
+Column name: {column_name}
+Return one item per value, in the same order. Each item has label and reported_confidence (a number from 0 to 1).
+
+Values:
+{values}
