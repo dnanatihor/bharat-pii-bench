@@ -20,7 +20,7 @@ def test_bench_config_matches_spec_defaults() -> None:
     assert config.detectors.regex_checksum_enabled is True
     assert config.detectors.presidio_enabled is False
     assert config.detectors.ner_enabled is False
-    assert config.detectors.ner_model_id == ""
+    assert config.detectors.ner_model_id == "dslim/bert-base-NER"
     assert config.detectors.llm_enabled is False
     assert config.detectors.llm_model_ids == ()
 
@@ -46,8 +46,8 @@ def test_presidio_and_ner_maps_use_taxonomy_labels() -> None:
     assert presidio["EMAIL_ADDRESS"] is Label.EMAIL
     assert presidio["PERSON"] is Label.PERSON_NAME
     assert "PHONE_NUMBER" not in presidio
-    assert ner == {}
-    assert all(isinstance(label, Label) for label in presidio.values())
+    assert ner["PER"] is Label.PERSON_NAME
+    assert all(isinstance(label, Label) for label in {**presidio, **ner}.values())
 
 
 def test_prices_start_empty_until_models_are_chosen() -> None:

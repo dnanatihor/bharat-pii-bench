@@ -67,7 +67,12 @@ packages = ["bharat_pii"]
 mypy_path = "src"
 
 [[tool.mypy.overrides]]
-module = ["bharat_pii.parquet_store", "bharat_pii.plots"]
+module = [
+    "bharat_pii.parquet_store",
+    "bharat_pii.plots",
+    "bharat_pii.adapters.presidio",
+    "bharat_pii.adapters.ner",
+]
 ignore_errors = true
 
 [tool.pytest.ini_options]

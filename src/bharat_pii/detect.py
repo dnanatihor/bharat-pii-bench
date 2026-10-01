@@ -2,7 +2,7 @@
 
 import re
 from collections import Counter
-from typing import Protocol
+from typing import Protocol, cast
 
 from bharat_pii.labels import Label
 from bharat_pii.validate import VALIDATORS
@@ -163,11 +163,19 @@ def mask(text: str, token_style: str = "typed") -> str:
     return rendered
 
 
-def detector_by_name(name: str) -> RegexChecksum:
+def detector_by_name(name: str) -> Detector:
     if name == "regex_checksum":
         return RegexChecksum()
     if name == "regex_checksum+names":
         return RegexChecksum(use_names=True)
+    if name == "presidio":
+        from bharat_pii.adapters.presidio import PresidioDetector
+
+        return cast(Detector, PresidioDetector())
+    if name == "ner":
+        from bharat_pii.adapters.ner import NerDetector
+
+        return cast(Detector, NerDetector())
     raise ValueError(f"unknown detector {name}")
 
 

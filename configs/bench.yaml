@@ -50,7 +50,7 @@ detectors:
     enabled: false
   ner:
     enabled: false
-    model_id: ""
+    model_id: dslim/bert-base-NER
   llm:
     enabled: false
     model_ids: []

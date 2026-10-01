@@ -13,3 +13,4 @@ and this project uses [Semantic Versioning](https://semver.org/).
 - Phase 1 generators and validators for the identifier taxonomy, including hard negatives.
 - Phase 2 dataset builder for seed-stable T1 and T2 Parquet, plus the dataset card.
 - Phase 3 regex-and-checksum detector, metrics, and run reports.
+- Phase 4 Presidio and NER adapters, with active Presidio recognizers recorded on each report.

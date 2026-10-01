@@ -10,7 +10,7 @@ from pathlib import Path
 
 from bharat_pii.config import BenchConfig, load_bench_config
 from bharat_pii.dataset import ColumnExample, build_t1, build_t2, with_seed
-from bharat_pii.detect import RegexChecksum, detector_by_name
+from bharat_pii.detect import Detector, detector_by_name
 from bharat_pii.labels import Label
 from bharat_pii.metrics import (
     hard_negative_false_positive_rate,
@@ -49,10 +49,18 @@ def run_baseline(
         f"Split: `{split}`. Seed: `{config.seed}`.",
         "",
     ]
+    loaded: list[Detector] = []
     for detector_name in detectors:
         detector = detector_by_name(detector_name)
+        loaded.append(detector)
         sections.append(f"## {detector.name} {detector.version}")
         sections.append("")
+        active = _active_recognizers(detector)
+        if active:
+            sections.append("### Active Presidio recognizers")
+            sections.append("")
+            sections.extend(f"- {recognizer}" for recognizer in active)
+            sections.append("")
         if t1:
             values = [row.value for row in t1]
             predicted, per_thousand = _classify_timed(detector, values)
@@ -83,6 +91,8 @@ def run_baseline(
             _write_t2(detector, t2, rows, sections)
     (directory / "report.md").write_text("\n".join(sections) + "\n", encoding="utf-8")
     _write_csv(directory / "metrics.csv", rows)
+    recognizers = [name for detector in loaded for name in _active_recognizers(detector)]
+    model_ids = [model_id for detector in loaded if (model_id := _model_id(detector))]
     (directory / "run.json").write_text(
         json.dumps(
             {
@@ -90,10 +100,10 @@ def run_baseline(
                 "seed": config.seed,
                 "split": split,
                 "detectors": list(detectors),
-                "versions": {name: detector_by_name(name).version for name in detectors},
-                "model_ids": [],
+                "versions": {detector.name: detector.version for detector in loaded},
+                "model_ids": model_ids,
                 "prompt_version": None,
-                "active_presidio_recognizers": [],
+                "active_presidio_recognizers": recognizers,
             },
             indent=2,
         )
@@ -111,7 +121,7 @@ def default_config(seed: int | None = None) -> BenchConfig:
 
 
 def _write_t2(
-    detector: RegexChecksum,
+    detector: Detector,
     columns: tuple[ColumnExample, ...],
     rows: list[dict[str, str]],
     sections: list[str],
@@ -144,7 +154,7 @@ def _write_t2(
 
 
 def _classify_timed(
-    detector: RegexChecksum,
+    detector: Detector,
     values: list[str],
 ) -> tuple[list[Label], dict[str, float]]:
     predicted: list[Label] = []
@@ -160,6 +170,18 @@ def _classify_timed(
         "p50": percentile(seconds_per_thousand, 50),
         "p95": percentile(seconds_per_thousand, 95),
     }
+
+
+def _active_recognizers(detector: Detector) -> tuple[str, ...]:
+    raw = getattr(detector, "active_recognizers", ())
+    if not isinstance(raw, tuple):
+        return ()
+    return tuple(str(item) for item in raw)
+
+
+def _model_id(detector: Detector) -> str:
+    raw = getattr(detector, "model_id", "")
+    return raw if isinstance(raw, str) else ""
 
 
 def _write_csv(path: Path, rows: list[dict[str, str]]) -> None:

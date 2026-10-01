@@ -1,3 +1,3 @@
-# Token-classification label -> taxonomy label.
-# Filled in Phase 4 once the model id is chosen (SPEC.md §12).
-{}
+# Hugging Face entity group -> taxonomy label. Unmapped groups become NONE.
+PER: PERSON_NAME
+person: PERSON_NAME
