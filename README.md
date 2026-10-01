@@ -53,7 +53,6 @@ Recorded in [docs/adr/](docs/adr/). The dataset card is [docs/dataset-card.md](d
 
 ## Roadmap
 
-- Sentence-level span detection (T3) is not built yet.
 - Driving licence, ABHA, and ration-card labels are not in the taxonomy yet.
 - `configs/bench.yaml` still has no default LLM model.
 

@@ -7,11 +7,12 @@ import uuid
 from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
+from typing import cast
 
 from bharat_pii.config import BenchConfig, load_bench_config
 from bharat_pii.cost import Budget
 from bharat_pii.dataset import ColumnExample, build_t1, build_t2, with_seed
-from bharat_pii.detect import Detector, detector_by_name
+from bharat_pii.detect import Detector, Span, detector_by_name
 from bharat_pii.labels import Label
 from bharat_pii.metrics import (
     hard_negative_false_positive_rate,
@@ -20,6 +21,7 @@ from bharat_pii.metrics import (
     score,
 )
 from bharat_pii.plots import plot_confusion
+from bharat_pii.spans import Sentence, build_t3, regex_spans, span_precision_recall
 
 
 @dataclass(frozen=True, slots=True)
@@ -44,6 +46,7 @@ def run_baseline(
     plots.mkdir(parents=True, exist_ok=True)
     t1 = tuple(row for row in build_t1(config) if row.split == split) if "t1" in tasks else ()
     t2 = build_t2(config) if "t2" in tasks else ()
+    t3 = build_t3(config) if "t3" in tasks else ()
     rows: list[dict[str, str]] = []
     sections: list[str] = [
         "# Benchmark report",
@@ -96,6 +99,8 @@ def run_baseline(
                 )
         if t2:
             _write_t2(detector, t2, rows, sections)
+        if t3:
+            _write_t3(detector, t3, rows, sections)
     (directory / "report.md").write_text("\n".join(sections) + "\n", encoding="utf-8")
     _write_csv(directory / "metrics.csv", rows)
     recognizers = [name for detector in loaded for name in _active_recognizers(detector)]
@@ -161,6 +166,47 @@ def _write_t2(
     for key, value in drops.items():
         sections.append(f"- {key}: {value:.4f}")
     sections.append("")
+
+
+def _write_t3(
+    detector: Detector,
+    sentences: tuple[Sentence, ...],
+    rows: list[dict[str, str]],
+    sections: list[str],
+) -> None:
+    predicted = _predict_spans(detector, [sentence.text for sentence in sentences])
+    precision, recall = span_precision_recall(
+        [sentence.spans for sentence in sentences],
+        predicted,
+    )
+    sections.append("### Span detection (T3)")
+    sections.append("")
+    sections.append(f"- span precision: {precision:.4f}")
+    sections.append(f"- span recall: {recall:.4f}")
+    sections.append("")
+    f1 = 0.0
+    if precision + recall:
+        f1 = 2 * precision * recall / (precision + recall)
+    rows.append(
+        {
+            "detector": detector.name,
+            "task": "t3",
+            "label": "SPAN",
+            "precision": f"{precision:.6f}",
+            "recall": f"{recall:.6f}",
+            "f1": f"{f1:.6f}",
+            "support": str(len(sentences)),
+        }
+    )
+
+
+def _predict_spans(detector: Detector, texts: list[str]) -> list[list[Span]]:
+    method = getattr(detector, "classify_spans", None)
+    if callable(method):
+        predicted = method(texts)
+        if isinstance(predicted, list):
+            return cast(list[list[Span]], predicted)
+    return regex_spans(texts)
 
 
 def _classify_timed(

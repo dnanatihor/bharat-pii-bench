@@ -19,7 +19,7 @@ def main(argv: list[str] | None = None) -> int:
     generate.add_argument("--out", type=Path, default=Path("data/generated"))
     run = subcommands.add_parser("run", help="score detectors and write a report")
     run.add_argument("--detectors", default="regex_checksum")
-    run.add_argument("--task", choices=("t1", "t2", "both"), default="both")
+    run.add_argument("--task", choices=("t1", "t2", "t3", "both"), default="both")
     run.add_argument("--split", choices=("dev", "test"), default="test")
     run.add_argument("--seed", type=int)
     run.add_argument("--out", type=Path, default=Path("results"))

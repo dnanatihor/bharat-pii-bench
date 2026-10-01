@@ -6,8 +6,14 @@ from typing import Any
 
 from bharat_pii.config import ConfigError, ModelPrice, load_bench_config, load_prices
 from bharat_pii.cost import OUTPUT_TOKENS_PER_VALUE, Budget, estimate_tokens, token_cost
+from bharat_pii.detect import Span
 from bharat_pii.labels import Label
 from bharat_pii.vote import majority_label
+
+SPAN_PROMPT_VERSION = "llm_spans_v1"
+_SPAN_PROMPT = (Path(__file__).resolve().parents[1] / "prompts" / "llm_spans_v1.txt").read_text(
+    encoding="utf-8"
+)
 
 BATCH_SIZE = 50
 PROMPT_VERSION = "llm_v1"
@@ -59,22 +65,44 @@ class LlmDetector:
             return Label.NONE
         return majority_label(recognised)
 
+    def classify_spans(self, texts: list[str]) -> list[list[Span]]:
+        found: list[list[Span]] = []
+        for start in range(0, len(texts), BATCH_SIZE):
+            batch = texts[start : start + BATCH_SIZE]
+            parsed = self._complete(render_span_prompt(batch), len(batch))
+            if parsed is None:
+                found.extend([[] for _ in batch])
+                continue
+            found.extend(_span_groups(parsed, batch))
+        return found
+
     def _classify_batch(self, column_name: str, values: list[str]) -> list[Label]:
-        prompt = render_prompt(column_name, values)
-        input_tokens, output_tokens = estimate_tokens(prompt, len(values))
+        parsed = self._complete(render_prompt(column_name, values), len(values))
+        if parsed is None:
+            return [Label.NONE] * len(values)
+        return _labels(parsed, len(values))
+
+    def _complete(self, prompt: str, count: int) -> Any | None:
+        input_tokens, output_tokens = estimate_tokens(prompt, count)
         estimate = token_cost(input_tokens, output_tokens, self._price)
         if not self._budget.allows(estimate):
-            return [Label.NONE] * len(values)
+            return None
         response = self._model.invoke(prompt)
         self.calls += 1
         parsed, reported_in, reported_out = _split_response(response)
         charged_in = reported_in if reported_in is not None else input_tokens
         charged_out = reported_out if reported_out is not None else output_tokens
-        charged_out = min(charged_out, OUTPUT_TOKENS_PER_VALUE * len(values))
+        charged_out = min(charged_out, OUTPUT_TOKENS_PER_VALUE * count)
         amount = min(token_cost(charged_in, charged_out, self._price), estimate)
         self._budget.charge(amount)
         self.cost_usd += amount
-        return _labels(parsed, len(values))
+        return parsed
+
+
+def render_span_prompt(sentences: list[str]) -> str:
+    taxonomy = ", ".join(label.value for label in Label)
+    listed = "\n".join(f"{index}. {sentence}" for index, sentence in enumerate(sentences, start=1))
+    return _SPAN_PROMPT.format(taxonomy=taxonomy, sentences=listed)
 
 
 def render_prompt(column_name: str, values: list[str]) -> str:
@@ -161,3 +189,35 @@ def _labels(parsed: Any, expected: int) -> list[Label]:
     if len(labels) < expected:
         labels.extend([Label.NONE] * (expected - len(labels)))
     return labels[:expected]
+
+
+def _span_groups(parsed: Any, sentences: list[str]) -> list[list[Span]]:
+    grouped: list[list[Span]] = [[] for _ in sentences]
+    if isinstance(parsed, dict):
+        raw_items: Any = parsed.get("items") or []
+    else:
+        raw_items = getattr(parsed, "items", None) or []
+    for item in raw_items:
+        sentence = _field(item, "sentence")
+        label_text = _field(item, "label")
+        start = _field(item, "start")
+        end = _field(item, "end")
+        if not isinstance(sentence, int) or not isinstance(start, int) or not isinstance(end, int):
+            continue
+        index = sentence - 1
+        if index < 0 or index >= len(sentences) or not 0 <= start < end <= len(sentences[index]):
+            continue
+        try:
+            label = Label(str(label_text))
+        except ValueError:
+            continue
+        if label is Label.NONE:
+            continue
+        grouped[index].append(Span(label, start, end))
+    return grouped
+
+
+def _field(item: Any, name: str) -> Any:
+    if isinstance(item, dict):
+        return item.get(name)
+    return getattr(item, name, None)

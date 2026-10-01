@@ -16,3 +16,4 @@ and this project uses [Semantic Versioning](https://semver.org/).
 - Phase 4 Presidio and NER adapters, with active Presidio recognizers recorded on each report.
 - Phase 5 LLM and hybrid detectors, with batched calls, priced token cost, and a budget guard.
 - Phase 6 README leaderboard from committed results, Quickstart CI job, and TestPyPI release workflow.
+- Phase 7 sentence spans in English, Hindi, and Hinglish, with exact span precision and recall.

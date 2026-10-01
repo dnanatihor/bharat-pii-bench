@@ -1,0 +1,8 @@
+prompt_version: llm_spans_v1
+
+Mark personal-data spans in each sentence.
+Taxonomy: {taxonomy}
+Return one item per span with sentence (the sentence number), label, start, end, and reported_confidence from 0 to 1. start and end are character offsets inside that sentence, not offsets in this prompt.
+
+Sentences:
+{sentences}
