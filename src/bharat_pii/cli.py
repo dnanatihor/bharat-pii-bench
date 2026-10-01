@@ -7,6 +7,7 @@ from bharat_pii.config import load_bench_config
 from bharat_pii.dataset import build_t1, build_t2, with_seed
 from bharat_pii.harness import default_config, run_baseline
 from bharat_pii.parquet_store import write_parquet
+from bharat_pii.readme import update_readme
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -25,6 +26,9 @@ def main(argv: list[str] | None = None) -> int:
     run.add_argument("--budget-usd", type=float)
     report = subcommands.add_parser("report", help="print a saved report")
     report.add_argument("run_dir", type=Path)
+    readme = subcommands.add_parser("readme", help="regenerate the README leaderboard")
+    readme.add_argument("--results", type=Path, default=Path("results"))
+    readme.add_argument("--readme", type=Path, default=Path("README.md"))
     args = parser.parse_args(argv)
     if args.command == "generate":
         return _generate(args.task, args.seed, Path(args.out))
@@ -45,6 +49,9 @@ def main(argv: list[str] | None = None) -> int:
     if args.command == "report":
         text = (Path(args.run_dir) / "report.md").read_text(encoding="utf-8")
         print(text, end="")
+        return 0
+    if args.command == "readme":
+        print(update_readme(Path(args.readme), Path(args.results)))
         return 0
     parser.error(f"unknown command {args.command}")
     return 2

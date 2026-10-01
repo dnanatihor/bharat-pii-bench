@@ -1,0 +1,18 @@
+{
+  "run_id": "2d78e6f9acb0",
+  "seed": 42,
+  "split": "test",
+  "detectors": [
+    "regex_checksum",
+    "regex_checksum+names"
+  ],
+  "versions": {
+    "regex_checksum": "0.1.0",
+    "regex_checksum+names": "0.1.0"
+  },
+  "model_ids": [],
+  "prompt_version": null,
+  "active_presidio_recognizers": [],
+  "cost_usd": 0.0,
+  "budget_usd": 5.0
+}

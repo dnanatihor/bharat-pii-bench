@@ -15,3 +15,4 @@ and this project uses [Semantic Versioning](https://semver.org/).
 - Phase 3 regex-and-checksum detector, metrics, and run reports.
 - Phase 4 Presidio and NER adapters, with active Presidio recognizers recorded on each report.
 - Phase 5 LLM and hybrid detectors, with batched calls, priced token cost, and a budget guard.
+- Phase 6 README leaderboard from committed results, Quickstart CI job, and TestPyPI release workflow.
