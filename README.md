@@ -4,8 +4,6 @@
 [![Licence](https://img.shields.io/badge/licence-Apache--2.0-blue)](LICENSE)
 [![PyPI](https://img.shields.io/badge/PyPI-TestPyPI-blue)](https://test.pypi.org/project/bharat-pii/)
 
-<!-- TODO: replace docs/demo.gif with a person-recorded leaderboard or terminal demo of bpb run. -->
-
 ![demo](docs/demo.gif)
 
 ## Why
